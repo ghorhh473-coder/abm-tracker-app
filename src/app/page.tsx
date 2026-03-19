@@ -5,6 +5,8 @@ import Image from "next/image";
 import html2canvas from "html2canvas";
 import { posthog } from '@/lib/posthog';
 
+// Auto mode: 24hr timer to increment line levels
+
 export default function Home() {
   const [lineLevels, setLineLevels] = useState([0, 0, 0, 0]);
   const [showShareCard, setShowShareCard] = useState(false);
