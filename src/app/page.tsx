@@ -64,9 +64,12 @@ export default function Home() {
       // Calculate 24 hours in milliseconds
       const twentyFourHours = 24 * 60 * 60 * 1000;
       
-      // If we haven't incremented before, or it's been 24 hours
-      if (!lastIncrement || now - lastIncrement >= twentyFourHours) {
+      // Only increment if it's been 24 hours since the last increment
+      if (lastIncrement && now - lastIncrement >= twentyFourHours) {
         fillUp();
+        lastIncrementRef.current = now;
+      } else if (!lastIncrement) {
+        // First time enabling auto mode, just record the start time
         lastIncrementRef.current = now;
       }
       
@@ -75,7 +78,7 @@ export default function Home() {
         const currentTime = Date.now();
         const lastInc = lastIncrementRef.current;
         
-        if (!lastInc || currentTime - lastInc >= twentyFourHours) {
+        if (lastInc && currentTime - lastInc >= twentyFourHours) {
           fillUp();
           lastIncrementRef.current = currentTime;
         }
@@ -92,6 +95,7 @@ export default function Home() {
         clearInterval(autoIntervalRef.current);
         autoIntervalRef.current = null;
       }
+      // Don't reset lastIncrementRef.current when turning off, so timer resumes
     }
   }, [autoMode]);
 
