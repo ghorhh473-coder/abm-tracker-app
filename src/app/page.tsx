@@ -16,12 +16,15 @@ export default function Home() {
   const [daysScroll, setDaysScroll] = useState(0);
   const [daysTargetScroll, setDaysTargetScroll] = useState(0);
   const [confirmedDaysValue, setConfirmedDaysValue] = useState(0);
+  const [autoMode, setAutoMode] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const isDraggingDaysRef = useRef(false);
   const dragStartYRef = useRef(0);
   const dragStartValueRef = useRef(0);
   const daysRafRef = useRef<number | null>(null);
   const daysHoldIntervalRef = useRef<number | null>(null);
+  const autoIntervalRef = useRef<number | null>(null);
+  const lastIncrementRef = useRef<number | null>(null);
 
   const fillUp = () => {
     setLineLevels(prev => {
@@ -47,6 +50,50 @@ export default function Home() {
     setShowShareCard(false);
     setShareView('preview');
   };
+
+  const toggleAutoMode = () => {
+    setAutoMode(prev => !prev);
+  };
+
+  // Auto mode: increment one line level every 24 hours
+  useEffect(() => {
+    if (autoMode) {
+      const now = Date.now();
+      const lastIncrement = lastIncrementRef.current;
+      
+      // Calculate 24 hours in milliseconds
+      const twentyFourHours = 24 * 60 * 60 * 1000;
+      
+      // If we haven't incremented before, or it's been 24 hours
+      if (!lastIncrement || now - lastIncrement >= twentyFourHours) {
+        fillUp();
+        lastIncrementRef.current = now;
+      }
+      
+      // Set up interval to check every minute
+      autoIntervalRef.current = window.setInterval(() => {
+        const currentTime = Date.now();
+        const lastInc = lastIncrementRef.current;
+        
+        if (!lastInc || currentTime - lastInc >= twentyFourHours) {
+          fillUp();
+          lastIncrementRef.current = currentTime;
+        }
+      }, 60 * 1000); // Check every minute
+      
+      return () => {
+        if (autoIntervalRef.current) {
+          clearInterval(autoIntervalRef.current);
+          autoIntervalRef.current = null;
+        }
+      };
+    } else {
+      if (autoIntervalRef.current) {
+        clearInterval(autoIntervalRef.current);
+        autoIntervalRef.current = null;
+      }
+    }
+  }, [autoMode]);
 
   const downloadCard = async () => {
     if (cardRef.current) {
@@ -297,6 +344,16 @@ export default function Home() {
           className="px-6 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
         >
           Empty Out
+        </button>
+        <button 
+          onClick={toggleAutoMode}
+          className={`px-6 py-2 rounded transition-colors ${
+            autoMode 
+              ? 'bg-green-600 text-white hover:bg-green-700' 
+              : 'bg-gray-700 text-white hover:bg-gray-600'
+          }`}
+        >
+          {autoMode ? 'Auto ON' : 'Auto OFF'}
         </button>
       </div>
 
