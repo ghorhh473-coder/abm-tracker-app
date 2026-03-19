@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, type WheelEvent, type PointerEvent } from "react";
 import Image from "next/image";
 import html2canvas from "html2canvas";
+import { posthog } from '@/lib/posthog';
 
 export default function Home() {
   const [lineLevels, setLineLevels] = useState([0, 0, 0, 0]);
@@ -206,7 +207,10 @@ export default function Home() {
       <div className="absolute top-4 right-4">
         <button
           type="button"
-          onClick={() => setShowSettings(true)}
+          onClick={() => {
+                  setShowSettings(true);
+                  posthog?.capture('open_settings');
+                }}
           className="p-3 bg-gray-800 text-white rounded-full hover:bg-gray-700 transition-colors"
           aria-label="Open settings"
         >
@@ -301,7 +305,10 @@ export default function Home() {
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
           <div className="bg-gray-900 p-6 rounded-lg max-w-md w-full mx-4">
             <button
-              onClick={() => setShareView('story')}
+              onClick={() => {
+                setShareView('story');
+                posthog?.capture('share_open');
+              }}
               className="text-left w-full"
               type="button"
             >
@@ -422,6 +429,7 @@ export default function Home() {
                       onClick={downloadCard}
                       className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity"
                       type="button"
+                      onMouseDown={() => posthog?.capture('share_download')}
                     >
                       Download Card
                     </button>
@@ -584,6 +592,7 @@ export default function Home() {
                   setDaysScroll(confirmedDaysValue);
                   setDaysTargetScroll(confirmedDaysValue);
                   setShowDaysRequest(true);
+                  posthog?.capture('open_request_days');
                 }}
                 className="text-left w-full rounded-md p-3 bg-gray-100 hover:bg-gray-50 transition-colors"
               >
@@ -635,6 +644,7 @@ export default function Home() {
                         setDaysScroll(preset);
                         setDaysValue(preset);
                         setShowDaysHelp(false);
+                        posthog?.capture('request_days_help_pick', { preset });
                       }}
                       className="px-4 py-4 rounded-lg bg-gray-900 text-white font-semibold hover:bg-gray-800 transition-colors"
                     >
@@ -858,7 +868,10 @@ export default function Home() {
                 <div className="flex space-x-4 mt-6">
                   <button
                     type="button"
-                    onClick={() => setShowDaysHelp(true)}
+                    onClick={() => {
+                  setShowDaysHelp(true);
+                  posthog?.capture('request_days_help_open');
+                }}
                     className="flex-1 px-4 py-3 bg-gray-800 text-white rounded-lg font-semibold hover:bg-gray-700 transition-colors"
                   >
                     Help
@@ -873,6 +886,7 @@ export default function Home() {
                       setConfirmedDaysValue(snapped);
                       setShowDaysHelp(false);
                       setShowDaysRequest(false);
+                      posthog?.capture('request_days_confirm', { value: snapped });
                     }}
                     className="flex-1 px-4 py-3 bg-white text-black rounded-lg font-semibold hover:bg-gray-200 transition-colors"
                   >
