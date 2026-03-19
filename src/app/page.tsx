@@ -20,6 +20,7 @@ export default function Home() {
   const [daysTargetScroll, setDaysTargetScroll] = useState(0);
   const [confirmedDaysValue, setConfirmedDaysValue] = useState(0);
   const [autoMode, setAutoMode] = useState(false);
+  const [showTimer, setShowTimer] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const isDraggingDaysRef = useRef(false);
   const dragStartYRef = useRef(0);
@@ -56,6 +57,23 @@ export default function Home() {
 
   const toggleAutoMode = () => {
     setAutoMode(prev => !prev);
+  };
+
+  const getTimeUntilNextIncrement = () => {
+    if (!autoMode || !lastIncrementRef.current) return null;
+    const now = Date.now();
+    const lastInc = lastIncrementRef.current;
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+    const elapsed = now - lastInc;
+    const remaining = Math.max(0, twentyFourHours - elapsed);
+    return remaining;
+  };
+
+  const formatTime = (ms: number) => {
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+    const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
   // Auto mode: increment one line level every 24 hours
@@ -101,6 +119,16 @@ export default function Home() {
       // Don't reset lastIncrementRef.current when turning off, so timer resumes
     }
   }, [autoMode]);
+
+  // Update timer display every second
+  useEffect(() => {
+    if (showTimer && autoMode) {
+      const interval = setInterval(() => {
+        // Force re-render to update timer
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [showTimer, autoMode]);
 
   const downloadCard = async () => {
     if (cardRef.current) {
@@ -362,7 +390,30 @@ export default function Home() {
         >
           {autoMode ? 'Auto ON' : 'Auto OFF'}
         </button>
+        <button 
+          onClick={() => setShowTimer(!showTimer)}
+          className={`px-6 py-2 rounded transition-colors ${
+            showTimer 
+              ? 'bg-blue-600 text-white hover:bg-blue-700' 
+              : 'bg-gray-700 text-white hover:bg-gray-600'
+          }`}
+        >
+          {showTimer ? 'Hide Timer' : 'Show Timer'}
+        </button>
       </div>
+
+      {/* Timer Display */}
+      {showTimer && autoMode && (
+        <div className="absolute top-80 left-8 bg-gray-800 bg-opacity-90 p-4 rounded-lg">
+          <div className="text-white text-sm font-semibold mb-2">Next increment in:</div>
+          <div className="text-2xl font-mono text-green-400">
+            {(() => {
+              const remaining = getTimeUntilNextIncrement();
+              return remaining ? formatTime(remaining) : '--:--:--';
+            })()}
+          </div>
+        </div>
+      )}
 
       {/* Shareable Card Modal */}
       {showShareCard && (
