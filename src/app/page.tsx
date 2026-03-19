@@ -19,8 +19,8 @@ export default function Home() {
   const [daysScroll, setDaysScroll] = useState(0);
   const [daysTargetScroll, setDaysTargetScroll] = useState(0);
   const [confirmedDaysValue, setConfirmedDaysValue] = useState(0);
-  const [autoMode, setAutoMode] = useState(false);
-  const [showTimer, setShowTimer] = useState(false);
+  const [autoMode, setAutoMode] = useState(true); // Auto start on load
+  const [showTimer, setShowTimer] = useState(true); // Show timer by default
   const [timerTime, setTimerTime] = useState<number | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const isDraggingDaysRef = useRef(false);
@@ -58,6 +58,10 @@ export default function Home() {
 
   const toggleAutoMode = () => {
     setAutoMode(prev => !prev);
+  };
+
+  const stopAutoMode = () => {
+    setAutoMode(false);
   };
 
   const getTimeUntilNextIncrement = () => {
@@ -389,29 +393,15 @@ export default function Home() {
           Empty Out
         </button>
         <button 
-          onClick={toggleAutoMode}
-          className={`px-6 py-2 rounded transition-colors ${
-            autoMode 
-              ? 'bg-green-600 text-white hover:bg-green-700' 
-              : 'bg-gray-700 text-white hover:bg-gray-600'
-          }`}
+          onClick={stopAutoMode}
+          className="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
         >
-          {autoMode ? 'Auto ON' : 'Auto OFF'}
-        </button>
-        <button 
-          onClick={() => setShowTimer(!showTimer)}
-          className={`px-6 py-2 rounded transition-colors ${
-            showTimer 
-              ? 'bg-blue-600 text-white hover:bg-blue-700' 
-              : 'bg-gray-700 text-white hover:bg-gray-600'
-          }`}
-        >
-          {showTimer ? 'Hide Timer' : 'Show Timer'}
+          Stop Timer
         </button>
       </div>
 
-      {/* Timer Display */}
-      {showTimer && autoMode && (
+      {/* Timer Display - Always visible when auto mode is on */}
+      {autoMode && (
         <div className="absolute top-80 left-8 bg-gray-800 bg-opacity-90 p-4 rounded-lg">
           <div className="text-white text-sm font-semibold mb-2">Next increment in:</div>
           <div className="text-2xl font-mono text-green-400">
