@@ -1,4 +1,5 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# abm-tracker
+A Next.js app to track your Akhand Brahmchari streak with 3D day picker, shareable Instagram cards, and settings.
 
 ## Getting Started
 
